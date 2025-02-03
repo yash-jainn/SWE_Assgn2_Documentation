@@ -343,6 +343,188 @@ This efficiently evaluates the polynomial using nested multiplication (Horner's 
 
 In summary, the divided difference table is precomputed in O(n²) time, following which the intermediate and expanded polynomials are calculated and stored as string. These strings can just be printed whenever the user calls the `poly` command. Evaluation is done with the help of Horner's method in O(n) time.
 
+
 ### Lagrange Interpolation Implementation
-**- TBD (Yash)** (Also need to add explanation of Polynomial Evaluation in the `lagrangePolynomial()` function)
+
+**Lagrange Interpolation** is a method used to construct a polynomial that exactly fits a given set of data points. The polynomial is constructed by using a weighted sum of Lagrange basis polynomials. Each basis polynomial is designed such that it is 1 at one specific data point and 0 at all other data points.
+
+The function computes the value of the interpolating polynomial for a given \( X \) by evaluating the sum of all the Lagrange basis polynomials, each weighted by the corresponding \( y \)-value.
+
+#### Steps:
+
+1. **Initialize** the result to 0.0.
+2. For each data point \( (x_i, y_i) \):
+   - Compute the Lagrange basis polynomial \( L_i(x) \) by iterating over all other data points \( j \neq i \).
+   - Multiply the result by the corresponding \( y_i \).
+3. Return the sum of all the weighted terms as the interpolated value at \( X \).
+
+#### Code Implementation:
+
+```cpp
+double lagrangeInterpolation(double X)
+{
+    // Initialize the result to 0.0
+    double result = 0.0;
+    int n = points.size();
+
+    // Iterate over each point in the dataset
+    for (int i = 0; i < n; i++)
+    {
+        double term = points[i].y; // Start with the y-value at point i
+
+        // Compute the Lagrange basis polynomial L_i(x)
+        for (int j = 0; j < n; j++)
+        {
+            if (j != i)
+            {
+                // Ensure there are no duplicate x-values
+                if (points[i].x == points[j].x)
+                {
+                    cerr << "[Error] Duplicate x-values detected, which will result in division by zero." << endl;
+                    exit(1);
+                }
+
+                // Multiply by the fraction for L_i(x)
+                term *= (X - points[j].x) / (points[i].x - points[j].x);
+            }
+        }
+
+        // Add the weighted term to the result
+        result += term;
+    }
+
+    return result;
+}
+```
+
+#### Explanation:
+
+1. **Outer loop**: Iterates over all points in the dataset to compute each Lagrange basis polynomial \( L_i(x) \).
+2. **Inner loop**: Computes the product for each Lagrange basis polynomial \( L_i(x) \) by iterating over all other points \( j \neq i \).
+3. The result is accumulated by adding each term, which is weighted by the corresponding \( y_i \).
+4. The final result is returned as the interpolated value at the given \( X \).
+
+#### Polynomial Evaluation:
+
+1. **Purpose**:
+   1. Constructs interpolating polynomial passing through given points
+   2. Outputs formatted polynomial string
+
+```cpp
+void LagrangePolynomial(void)
+	{
+        //1. Initialisation
+        //2. Calculate Coefficients
+        //3. Format and print ouytput
+    }
+
+```
+
+2. **Algorithm Steps**:
+
+A. *Initialize*:
+
+- Check for empty points
+- Setup coefficient vector
+
+```cpp
+    int n = points.size();
+    if (n == 0)
+    {
+        cout << 0 << endl; // Return zero polynomial for empty input
+    }
+
+    vector<double> finalCoeff(n, 0.0);
+```
+
+B. *Calculate Coefficients*:
+
+- A[Start] --> B[For each point i]
+- B --> C[Initialize basis term]
+- C --> D[For each point j≠i]
+- D --> E[Multiply by (x-xⱼ)/(xᵢ-xⱼ)]
+- E --> F[Multiply by yᵢ]
+- F --> G[Add to final coefficients]
+
+```cpp
+    // Compute the coefficients of the polynomial
+		for (int i = 0; i < n; ++i)
+		-
+			vector<double> term(1, 1.0); // Start with a constant 1 for L_i(x)
+
+			for (int j = 0; j < n; ++j)
+			{
+				if (j != i)
+				{
+					// Multiply the term by (x - points[j].x)
+					vector<double> temp(term.size() + 1, 0.0);
+
+					for (int k = 0; k < term.size(); ++k)
+					{
+						temp[k] -= term[k] * points[j].x; // Multiply by (-points[j].x)
+						temp[k + 1] += term[k];			  // Multiply by x
+					}
+
+					term = temp;
+
+					// Divide by (points[i].x - points[j].x)
+					double denominator = points[i].x - points[j].x;
+					for (double &coeff : term)
+					{
+						coeff /= denominator;
+					}
+				}
+			}
+
+			// Multiply by y-value and add to final coefficients
+			for (int k = 0; k < term.size(); ++k)
+			{
+				finalCoeff[k] += term[k] * points[i].y;
+			}
+
+
+```
+
+C.  *Format Output and Print it*:
+
+- Highest degree terms first
+- Include proper signs
+- Add exponents
+
+```cpp
+    // Format the polynomial string
+		stringstream ss;
+		bool first = true;
+
+		for (int i = finalCoeff.size() - 1; i >= 0; --i)
+		{
+			if (abs(finalCoeff[i]) < 1e-10)
+				continue; // Skip near-zero coefficients
+
+			if (!first && finalCoeff[i] > 0)
+				ss << "+";
+			if (abs(finalCoeff[i] - 1) > 1e-10 || i == 0)
+				ss << fixed << setprecision(4) << finalCoeff[i];
+
+			if (i > 0)
+			{
+				ss << "x";
+				if (i > 1)
+					ss << "^" << i;
+			}
+
+			first = false;
+		}
+
+		string result = ss.str();
+		if (result.empty())
+		{
+			cout << 0 << endl;
+		}
+		else
+		{
+			cout << result << endl;
+		}
+
+```
 
